@@ -98,7 +98,7 @@ class CCMaterialLoader:
     def create_material(new_mat: bpy.types.Material, base_image_path: str, ambient_occlusion_image_path: str, metallic_image_path: str,
                         roughness_image_path: str, alpha_image_path: str, normal_image_path: str, displacement_image_path: str):
         """
-        Create a material for the cctexture datatset, the combination used here is calibrated to this.
+        Create a material for the cctexture dataset, the combination used here is calibrated to this.
 
         :param new_mat: The new material, which will get all the given textures
         :param base_image_path: The path to the color image
