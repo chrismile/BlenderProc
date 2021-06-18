@@ -175,6 +175,10 @@ class Front3DRefinedLoader:
             # flip the first and second value
             vertices[:, 1], vertices[:, 2] = vertices[:, 2], vertices[:, 1].copy()
             normal[:, 1], normal[:, 2] = normal[:, 2], normal[:, 1].copy()
+
+            # fix z fighting with surfaces on floor
+            vertices[:, 2] -= 0.001
+
             # reshape back to a long list
             vertices = np.reshape(vertices, [num_vertices * 3])
             normal = np.reshape(normal, [num_vertices * 3])
@@ -242,8 +246,17 @@ class Front3DRefinedLoader:
         """
         # collect all loaded furniture objects
         all_objs = []
+        # set of already encountered uids - there are some duplicated objects in some scenes, which should be skipped.
+        obj_uids = set()
         # for each furniture element
         for ele in data["furniture"]:
+            # skip invalid or already encountered objects
+            if "valid" not in ele or not ele["valid"]:
+                continue
+            if ele["uid"] in obj_uids:
+                continue
+            obj_uids.add(ele["uid"])
+
             # create the paths based on the "jid"
             folder_path = os.path.join(future_model_path, ele["jid"])
             obj_file = os.path.join(folder_path, "raw_model.obj")
@@ -318,6 +331,7 @@ class Front3DRefinedLoader:
             for child in room["children"]:
                 if "furniture" in child["instanceid"]:
                     # find the object where the uid matches the child ref id
+                    used_obj_indices = []
                     for obj in all_loaded_furniture:
                         if obj.get_cp("uid") == child["ref"]:
                             # if the object was used before, duplicate the object and move that duplicated obj
@@ -333,9 +347,18 @@ class Front3DRefinedLoader:
                             new_obj.set_cp("coarse_grained_class", new_obj.get_cp("category_id"))
                             # this flips the y and z coordinate to bring it to the blender coordinate system
                             new_obj.set_location(mathutils.Vector(child["pos"]).xzy)
-                            new_obj.set_scale(child["scale"])
+
+                            if child["ref"] == "2021159106489566247072/model":
+                                print("HERE")
+
+                            new_scale = child["scale"].copy()
+                            new_scale[0] = -1 * new_scale[0]
+                            print(new_obj)
+                            #new_obj.set_scale(child["scale"])
+                            new_obj.set_scale(new_scale)
                             # extract the quaternion and convert it to a rotation matrix
                             rotation_mat = mathutils.Quaternion(child["rot"]).to_euler().to_matrix().to_4x4()
                             # transform it into the blender coordinate system and then to an euler
                             new_obj.set_rotation_euler((blender_rot_mat @ rotation_mat).to_euler())
+
         return created_objects
