@@ -63,7 +63,20 @@ class Front3DCameraSampler(CameraSampler):
                 if is_above:
                     floor_obj_counters[floor_obj.name] += 1
         amount_of_objects_needed_per_room = self.config.get_int("amount_of_objects_needed_per_room", 2)
-        self.used_floors = [obj for obj in floor_objs if floor_obj_counters[obj.name] > amount_of_objects_needed_per_room]
+        while True:
+            self.used_floors = [obj for obj in floor_objs if floor_obj_counters[obj.name] > amount_of_objects_needed_per_room]
+            # no suitable floors found?
+            if len(self.used_floors) == 0:
+                if amount_of_objects_needed_per_room > 0:
+                    # reduce necessary number of objects.
+                    amount_of_objects_needed_per_room -= 1
+                    continue
+                else:
+                    # found no suitable floors.
+                    raise Exception("Error: No floors containing objects found in Front3DCameraSampler.run.")
+            else:
+                # found suitable floors.
+                break
 
         super().run()
 
