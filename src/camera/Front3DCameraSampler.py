@@ -56,7 +56,8 @@ class Front3DCameraSampler(CameraSampler):
             if "wall" in name or "ceiling" in name:
                 continue
             counter += 1
-            location = obj.location
+            location = obj.location.copy()
+            location.z += 0.002  # floor is shifted to reduce z-fighting, add 2*epsilon.
             for floor_obj in floor_objs:
                 is_above = self._position_is_above_object(location, floor_obj)
                 if is_above:

@@ -177,7 +177,7 @@ class Front3DRefinedLoader:
             normal[:, 1], normal[:, 2] = normal[:, 2], normal[:, 1].copy()
 
             # fix z fighting with surfaces on floor
-            vertices[:, 2] -= 0.001
+            vertices[:, 2] += 0.001
 
             # reshape back to a long list
             vertices = np.reshape(vertices, [num_vertices * 3])
@@ -269,6 +269,11 @@ class Front3DRefinedLoader:
                 #used_obj_name = ele["category"]  # <- For previous version of dataset.
                 used_obj_name = model_id_category_dict[ele['jid']]
                 for obj in objs:
+                    # filter objects with clearly wrong scale (e.g., existing in 011b264d-e2ef-426a-a4d5-d99de5bc68e2).
+                    if obj.blender_obj.dimensions.z > 20.0:
+                        bpy.data.objects.remove(obj.blender_obj, do_unlink=True)
+                        continue
+
                     obj.set_name(used_obj_name)
                     # add some custom properties
                     obj.set_cp("uid", ele["uid"])
@@ -280,8 +285,7 @@ class Front3DRefinedLoader:
                     # set the category id based on the used obj name
                     print(used_obj_name.lower())
                     if used_obj_name.lower() not in mapping:
-                        print(ele)
-                        print("BLABLA 123456789")
+                        raise Exception("Error: Object name does not exist in the dictionary.")
                     obj.set_cp("category_id", mapping[used_obj_name.lower()])
                     # walk over all materials
                     for mat in obj.get_materials():
@@ -306,7 +310,9 @@ class Front3DRefinedLoader:
                         if is_lamp:
                             mat.make_emissive(lamp_light_strength)
 
-                all_objs.extend(objs)
+                    all_objs.append(obj)
+
+                #all_objs.extend(objs)
             elif "7e101ef3-7722-4af8-90d5-7c562834fabd" in obj_file:
                 warnings.warn(f"This file {obj_file} was skipped as it can not be read by blender.")
         return all_objs
