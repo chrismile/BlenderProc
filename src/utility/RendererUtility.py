@@ -159,6 +159,18 @@ class RendererUtility:
             bpy.context.scene.render.threads_mode = "AUTO"
 
     @staticmethod
+    def set_background(color=(1.0, 0.05, 0.05, 1), strength=1.0):
+        """ Sets the background color and light strength used for rendering.
+
+        :param color: The color of the background.
+        :param strength: The intensity of the background.
+        """
+        if color is not None:
+            bpy.context.scene.world.node_tree.nodes["Background"].inputs[0].default_value = color
+        if strength is not None:
+            bpy.context.scene.world.node_tree.nodes["Background"].inputs[1].default_value = strength
+
+    @staticmethod
     def toggle_stereo(enable: bool):
         """ Enables/Disables stereoscopy.
 
