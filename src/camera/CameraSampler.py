@@ -319,6 +319,11 @@ class CameraSampler(CameraInterface):
         hit, _, _, _, hit_object, _ = bpy.context.scene.ray_cast(bpy.context.view_layer.depsgraph,
                                                                  position,
                                                                  mathutils.Vector([0, 0, -1]))
+
+        # some scenes (like 0540bfc9-07ff-4b74-bf09-ceef34250b0a) can have customized platforms over the floors.
+        if hit and "customizedplatform" in hit_object.name.tolower():
+            return True
+
         return hit and hit_object == object
 
 
