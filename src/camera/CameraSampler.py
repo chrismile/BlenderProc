@@ -321,7 +321,7 @@ class CameraSampler(CameraInterface):
                                                                  mathutils.Vector([0, 0, -1]))
 
         # some scenes (like 0540bfc9-07ff-4b74-bf09-ceef34250b0a) can have customized platforms over the floors.
-        if hit and "customizedplatform" in hit_object.name.tolower():
+        if hit and "customizedplatform" in hit_object.name.lower():
             return True
 
         return hit and hit_object == object
