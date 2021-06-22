@@ -304,7 +304,10 @@ class Front3DRefinedLoader:
                         image_node = mat.new_node('ShaderNodeTexImage')
                         # and load the texture.png
                         base_image_path = os.path.join(folder_path, "texture.png")
-                        image_node.image = bpy.data.images.load(base_image_path, check_existing=True)
+                        if os.path.exists(base_image_path):
+                            image_node.image = bpy.data.images.load(base_image_path, check_existing=True)
+                        else:
+                            warnings.warn(f"Could not open the image path {base_image_path}.")
                         mat.link(image_node.outputs['Color'], principled_node.inputs['Base Color'])
                         # if the object is a lamp, do the same as for the ceiling and add an emission shader
                         if is_lamp:
