@@ -37,6 +37,15 @@ class Light(Entity):
         self.blender_obj.data.color = color
         Utility.insert_keyframe(self.blender_obj.data, "color", frame)
 
+    def set_angle(self, angle: float, frame: int = None):
+        """ Sets the angular diameter of a light source of type 'SUN'.
+
+        :param angle: The rgb color to set.
+        :param frame: The frame number which the value should be set to. If None is given, the current frame number is used.
+        """
+        self.blender_obj.data.angle = angle
+        Utility.insert_keyframe(self.blender_obj.data, "angle", frame)
+
     def set_distance(self, distance: float, frame: int = None):
         """ Sets the falloff distance of the light = point where light is half the original intensity.
 
