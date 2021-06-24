@@ -102,6 +102,8 @@ class Front3DLightSampler(Module):
             self.number_of_samples = 4
 
     def run(self):
+        bpy.context.scene.frame_end = max(bpy.context.scene.frame_end, self.number_of_samples)
+
         all_objects = get_all_blender_mesh_objects()
         front_3d_objs = [obj for obj in all_objects if "is_3D_future" in obj and obj["is_3D_future"]]
         ceiling_objs = [obj for obj in front_3d_objs if "ceiling" in obj.name.lower()]
@@ -192,20 +194,20 @@ class Front3DLightSampler(Module):
     def sample_params_ceiling_light(self):
         if self.is_day:
             if self.weather == Weather.CLEAR:
-                probability_on = 0.1
+                probability_on = 0.15
             else:
-                probability_on = 0.4
+                probability_on = 0.5
         else:
-            probability_on = 0.8
+            probability_on = 0.85
 
         is_on = np.random.binomial(n=1, p=probability_on)
         if is_on:
-            strength = np.random.uniform(0.2, 0.5)
-            # White to orange-ish.
-            color = color_lerp((1.0, 1.0, 1.0, 1.0), (1.0, 0.73, 0.49, 1.0), np.random.uniform(0, 1))
+            strength = np.random.uniform(0.6, 1.0)
         else:
-            strength = 0.0
-            color = (0, 0, 0, 1.0)
+            strength = 0.1
+
+        # White to orange-ish.
+        color = color_lerp((1.0, 1.0, 1.0, 1.0), (1.0, 0.73, 0.49, 1.0), np.random.uniform(0, 1))
 
         return strength, color
 
@@ -216,12 +218,12 @@ class Front3DLightSampler(Module):
             if self.weather == Weather.CLOUDY:
                 strength *= np.random.uniform(0.5, 2.0)
             else:
-                strength *= np.random.uniform(5.0, 12.0)
+                strength *= np.random.uniform(6.0, 12.0)
 
         if self.red_sky:
             # Either red-ish or orange-ish sky during dawn and dusk.
             color = color_lerp((1.0, 0.15, 0.15), (1.0, 0.47, 0.25), self.sky_interp_factor)
-            strength = np.random.uniform(2.0, 10.0)
+            strength = np.random.uniform(4.0, 10.0)
         elif self.is_day:
             # Daylight.
             color = (1.0, 1.0, 1.0)
@@ -239,9 +241,9 @@ class Front3DLightSampler(Module):
 
         if self.is_day:
             if self.weather == Weather.CLOUDY:
-                strength *= np.random.uniform(0.3, 0.6)
+                strength *= np.random.uniform(1.5, 3.0)
             else:
-                strength *= np.random.uniform(0.5, 2.0)
+                strength *= np.random.uniform(2.0, 4.0)
         else:
             strength *= np.random.uniform(0.1, 0.6)
 
